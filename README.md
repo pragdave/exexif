@@ -29,7 +29,7 @@ Read TIFF and EXIF information from a JPEG-format image.
         iex> info.exif |> Dict.keys
         [:brightness_value, :color_space, :component_configuration,
          :compressed_bits_per_pixel, :contrast, :custom_rendered, :datetime_original,
-         :datetime_tigitized, :digital_zoom_ratio, :exif_image_height,
+         :datetime_digitized, :digital_zoom_ratio, :exif_image_height,
          :exif_image_width, :exif_version, :exposure_bias_value, :exposure_mode,
          :exposure_program, :exposure_time, :f_number, :file_source, :flash,
          :flash_pix_persion, :focal_length, :focal_length_in_35mm_film,
