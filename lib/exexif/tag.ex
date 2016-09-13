@@ -66,20 +66,27 @@ defmodule Exexif.Tag do
   #   # size 1                            
   # end
 
+  def value(_, _, _, _) do # Handle malformed tags
+    nil
+  end
 
   def decode_numeric(value, count, size,  {exif, _offset, ru}) do
     length = count * size
     values = if length > 4 do
-      << _ :: binary-size(value), data :: binary-size(length), _ :: binary >> = exif
-      data
+      case exif do
+        << _ :: binary-size(value), data :: binary-size(length), _ :: binary >> -> data
+        _ -> nil # probably a maker_note or user_comment
+      end
     else
       << data :: binary-size(length), _ :: binary >> = value
       data
     end
-    if count == 1 do
-       ru.(values)
-    else
-      read_unsigned_many(values, size, ru)
+    if values do
+      if count == 1 do
+        ru.(values)
+      else
+        read_unsigned_many(values, size, ru)
+      end
     end
   end
 
@@ -110,6 +117,7 @@ defmodule Exexif.Tag do
     result = case {d,n}  do
       {1,n} -> n
       {d,1} -> "1/#{d}"
+      {0,_} -> :infinity
       {d,n} -> round((n * 1000)/d)/1000
     end
     [ result | decode_ratios(rest, count-1, 0, ru, signed) ]
