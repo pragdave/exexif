@@ -103,11 +103,14 @@ defmodule Exexif do
     end
     read_tags(count-1, rest, context, type, [ kv | result ])
   end
-   
+
+  def read_tags(_, _, _, _, result) do # Handle malformed data
+    Enum.into(result, %{})
+  end
+
   def read_exif(exif_offset, {exif, _offset, ru} = context) do
     << _ :: binary-size(exif_offset), count :: binary-size(2), tags :: binary >> = exif
     count = ru.(count)
     read_tags(count, tags, context, :exif, [])
   end
-
 end

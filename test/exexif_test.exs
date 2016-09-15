@@ -75,4 +75,25 @@ defmodule ExexifTest do
       :white_balance             => "Auto"
     } = exif
   end
+
+  test "malformed images" do
+    assert {:ok, data} = exif_from_jpeg_file("test/images/malformed.jpg")
+    assert %{make: "SAMSUNG"} = data
+  end
+
+  test "bad values" do
+    # Apple Aperture inserts invalid values
+    assert {:ok, data} = exif_from_app1_file("test/images/apple-aperture-1.5.app1")
+    assert %{make: "NIKON CORPORATION"} = data
+  end
+
+  test "infinity" do
+    # GoPro uses ratio numerator 0 to relay infinity
+    assert {:ok, data} = exif_from_app1_file("test/images/gopro_hd2.app1")
+    assert %{exif: %{subject_distance: :infinity}} = data
+  end
+
+  defp exif_from_app1_file(path) do
+    read_exif(File.read!(path))
+  end
 end
