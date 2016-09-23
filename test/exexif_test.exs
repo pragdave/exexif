@@ -93,6 +93,11 @@ defmodule ExexifTest do
     assert %{exif: %{subject_distance: :infinity}} = data
   end
 
+  test "negative exposure bias" do
+    assert {:ok, data} = exif_from_app1_file("test/images/negative-exposure-bias-value.app1")
+    assert %{exif: %{exposure_bias_value: -0.333}} = data
+  end
+
   defp exif_from_app1_file(path) do
     read_exif(File.read!(path))
   end
