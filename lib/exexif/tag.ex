@@ -133,7 +133,7 @@ defmodule Exexif.Tag do
   end
 
   def maybe_signed_int(x, :signed) when x > @max_signed_32_bit_int do
-    x - @max_signed_32_bit_int - 1
+    x - (@max_signed_32_bit_int + 1) * 2
   end
   def maybe_signed_int(x, _), do: x  # +ve or unsigned
 
