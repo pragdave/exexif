@@ -1,6 +1,6 @@
 defmodule Exexif.Decode do
 
-  @module_doc """
+  @moduledoc """
     Decode tags and (in some cases) their parameters
   """
 
@@ -15,7 +15,7 @@ defmodule Exexif.Decode do
   def tag(:tiff, 0x0131, value), do: { :software, value }
   def tag(:tiff, 0x0132, value), do: { :modify_date, inspect(value) }
   def tag(:tiff, 0x8769, value), do: { :exif, value }
-      
+  def tag(:tiff, 0x8825, value), do: { :gps, value }
 
   def tag(:exif, 0x829a, value), do: {:exposure_time, value }
   def tag(:exif, 0x829d, value), do: {:f_number, value }
@@ -54,7 +54,7 @@ defmodule Exexif.Decode do
   def tag(:exif, 0xa004, value), do: {:related_sound_file, value }
   def tag(:exif, 0xa20b, value), do: {:flash_energy, value }
   def tag(:exif, 0xa20c, value), do: {:spatial_frequency_response, value }
-  def tag(:exif, 0xa20e, value), do: {:focal_plane_x_resolution, value }	
+  def tag(:exif, 0xa20e, value), do: {:focal_plane_x_resolution, value }
   def tag(:exif, 0xa20f, value), do: {:focal_plane_y_resolution, value }
   def tag(:exif, 0xa210, value), do: {:focal_plane_resolution_unit, focal_plane_resolution_unit(value) }
   def tag(:exif, 0xa214, value), do: {:subject_location, value }
@@ -81,7 +81,12 @@ defmodule Exexif.Decode do
   def tag(:exif, 0xa434, value), do: {:lens_model, value }
   def tag(:exif, 0xa435, value), do: {:lens_serial_number, value }
 
-
+  # http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/GPS.html
+  Exexif.Data.Gps.fields
+  |> Enum.with_index
+  |> Enum.each(fn {e, i} ->
+    def tag(:gps, unquote(i), value), do: {unquote(e), value}
+  end)
 
   def tag(type, tag, value) do
     {~s[#{type} tag(0x#{:io_lib.format("~.16B", [tag])})], inspect value }
@@ -116,7 +121,7 @@ defmodule Exexif.Decode do
   defp sensitivity_type(1), do: "Standard Output Sensitivity"
   defp sensitivity_type(2), do: "Recommended Exposure Index"
   defp sensitivity_type(3), do: "ISO Speed"
-  defp sensitivity_type(4), do: " Standard Output Sensitivity and Recommended Exposure Index" 
+  defp sensitivity_type(4), do: " Standard Output Sensitivity and Recommended Exposure Index"
   defp sensitivity_type(5), do: "Standard Output Sensitivity and ISO Speed"
   defp sensitivity_type(6), do: "Recommended Exposure Index and ISO Speed"
   defp sensitivity_type(7), do: "Standard Output Sensitivity, Recommended Exposure Index and ISO Speed"

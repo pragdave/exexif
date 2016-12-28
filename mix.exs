@@ -3,11 +3,11 @@ defmodule Exexif.Mixfile do
 
   def project do
     [app: :exexif,
-     version: "0.0.1",
+     version: "0.0.2",
      elixir: "~> 1.1-dev",
      deps: [],
-     description: description,
-     package:     package,
+     description: description(),
+     package:     package(),
     ]
   end
 
@@ -51,14 +51,30 @@ defmodule Exexif.Mixfile do
              :flash_pix_persion, :focal_length, :focal_length_in_35mm_film,
              :iso_speed_ratings, :lens_info, :light_source, :max_aperture_value,
              :metering_mode, :recommended_exposure, :saturation, :scene_capture_type,
-             :scene_type, :sensitivity_type, :sharpness, :white_balance] 
+             :scene_type, :sensitivity_type, :sharpness, :white_balance]
+
+    4. GPS data is in there, too (if presented in EXIF, of course.)
+
+            iex> {:ok, info} = Exexif.exif_from_jpeg_file("test/images/sunrise.jpg")
+            {:ok,
+             %{exif: %{color_space: "Uncalibrated", exif_version: "2.10", ...},
+               gps: %Exexif.Data.Gps{gps_altitude: 47, gps_altitude_ref: 0, ...},
+               make: "ulefone", model: "Power", modify_date: "\"2016:12:28 14:04:48\"",
+               orientation: "Horizontal (normal)", resolution_units: "Pixels/in",
+               x_resolution: 72, y_resolution: 72}}
+
+            iex> info.gps.gps_latitude
+            [41, 23, 16.019]
+
+            iex> "#{info.gps}"
+            "41°23´16˝N,2°11´50˝E"
     """
   end
 
   defp package do
     [
       files:        [ "lib", "mix.exs", "README.md", "LICENSE.md" ],
-      contributors: [ "Dave Thomas <dave@pragprog.org>"],
+      contributors: [ "Dave Thomas <dave@pragprog.org>", "Aleksei Matiushkin <am@mudasobwa.ru>"],
       licenses:     [ "MIT. See LICENSE.md" ],
       links:        %{
                        "GitHub" => "https://github.com/pragdave/exexif",

@@ -6,15 +6,15 @@ defmodule Exexif do
   @max_exif_len          2*(65536+2)
 
   @image_start_marker   0xffd8
-  @image_end_marker     0xffd9
+  # @image_end_marker     0xffd9 # NOT USED
 
   @app1_marker 0xffe1
 
 
   def exif_from_jpeg_file(name) when is_binary(name) do
-    {:ok, buffer} = File.open(name, 
-                              [:read], 
-                              fn (file) -> 
+    {:ok, buffer} = File.open(name,
+                              [:read],
+                              fn (file) ->
                                 IO.binread(file, @max_exif_len)
                               end)
     exif_from_jpeg_buffer(buffer)
@@ -28,9 +28,9 @@ defmodule Exexif do
   def exif_from_jpeg_buffer(_), do: {:error, :not_a_jpeg_file}
 
 
-  def read_exif(<< 
-                  @app1_marker :: 16, 
-                  _len         :: 16, 
+  def read_exif(<<
+                  @app1_marker :: 16,
+                  _len         :: 16,
                   "Exif"       :: binary,
                   0            :: 16,
                   exif         :: binary
@@ -81,9 +81,9 @@ defmodule Exexif do
     Enum.into(result, %{})
   end
 
-  def read_tags(count, 
-                << 
-                  tag :: binary-size(2), 
+  def read_tags(count,
+                <<
+                  tag :: binary-size(2),
                   format :: binary-size(2),
                   component_count :: binary-size(4),
                   value :: binary-size(4),
@@ -99,6 +99,7 @@ defmodule Exexif do
     {name, description} = Decode.tag(type, tag, value)
     kv = case name do
       :exif -> { :exif, read_exif(value, context) }
+      :gps  -> { :gps,  read_gps(value, context) }
       _     -> { name,  description }
     end
     read_tags(count-1, rest, context, type, [ kv | result ])
@@ -112,5 +113,10 @@ defmodule Exexif do
     << _ :: binary-size(exif_offset), count :: binary-size(2), tags :: binary >> = exif
     count = ru.(count)
     read_tags(count, tags, context, :exif, [])
+  end
+
+  def read_gps(gps_offset, {gps, _offset, ru} = context) do
+    << _ :: binary-size(gps_offset), count :: binary-size(2), tags :: binary >> = gps
+    struct(Exexif.Data.Gps, read_tags(ru.(count), tags, context, :gps, []))
   end
 end
