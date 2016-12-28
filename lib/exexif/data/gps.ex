@@ -38,8 +38,8 @@ defmodule Exexif.Data.Gps do
 
   defstruct @fields
 
-  def inspect(%Exexif.Data.Gps{gps_latitude: nil} = data), do: ""
-  def inspect(%Exexif.Data.Gps{gps_longitude: nil} = data), do: ""
+  def inspect(%Exexif.Data.Gps{gps_latitude: nil} = _data), do: ""
+  def inspect(%Exexif.Data.Gps{gps_longitude: nil} = _data), do: ""
 
   def inspect(%Exexif.Data.Gps{} = data) do
     # gps_latitude: [41, 23, 16.019], gps_latitude_ref: "N",

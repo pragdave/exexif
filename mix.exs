@@ -56,17 +56,11 @@ defmodule Exexif.Mixfile do
     4. GPS data is in there, too (if presented in EXIF, of course.)
 
             iex> {:ok, info} = Exexif.exif_from_jpeg_file("test/images/sunrise.jpg")
-            {:ok,
-             %{exif: %{color_space: "Uncalibrated", exif_version: "2.10", ...},
-               gps: %Exexif.Data.Gps{gps_altitude: 47, gps_altitude_ref: 0, ...},
-               make: "ulefone", model: "Power", modify_date: "\"2016:12:28 14:04:48\"",
-               orientation: "Horizontal (normal)", resolution_units: "Pixels/in",
-               x_resolution: 72, y_resolution: 72}}
-
-            iex> info.gps.gps_latitude
+            ...> info.gps.gps_latitude
             [41, 23, 16.019]
 
-            iex> "#{info.gps}"
+            iex> {:ok, info} = Exexif.exif_from_jpeg_file("test/images/sunrise.jpg")
+            ...> Exexif.Data.Gps.inspect info
             "41°23´16˝N,2°11´50˝E"
     """
   end
