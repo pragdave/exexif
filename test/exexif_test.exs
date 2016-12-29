@@ -3,6 +3,42 @@ defmodule ExexifTest do
   import Exexif
 
   @data    File.read!("test/images/pp_editors.jpg")
+  @test_exif %{
+    :brightness_value          => 7.084,
+    :color_space               => "sRGB",
+    :component_configuration   => "Y,Cb,Cr,-",
+    :compressed_bits_per_pixel => 2,
+    :contrast                  => "Normal",
+    :custom_rendered           => "Normal",
+    :datetime_digitized        => "2014:05:14 11:57:07",
+    :datetime_original         => "2014:05:14 11:57:07",
+    :digital_zoom_ratio        => 1,
+    :exif_image_height         => 335,
+    :exif_image_width          => 800,
+    :exif_version              => "2.30",
+    :exposure_mode             => "Auto",
+    :exposure_bias_value       => 0,
+    :exposure_program          => "Program AE",
+    :exposure_time             => "1/200",
+    :f_number                  => 4,
+    :file_source               => "Digital Camera",
+    :flash                     => "Off, Did not fire",
+    :flash_pix_version         => "1.00",
+    :focal_length_in_35mm_film => 28,
+    :focal_length              => 10.4,
+    :iso_speed_ratings         => 160,
+    :lens_info                 => [10.4, 37.1, 1.8, 4.9],
+    :light_source              => 0,
+    :max_aperture_value        => 1.695,
+    :metering_mode             => "Multi-segment",
+    :recommended_exposure      => 160,
+    :saturation                => "Normal",
+    :scene_capture_type        => "Standard",
+    :scene_type                => "Directly photographed",
+    :sensitivity_type          => "Recommended Exposure Index",
+    :sharpness                 => "Normal",
+    :white_balance             => "Auto"
+  }
 
   test "looks for jpeg marker" do
     assert { :error, :not_a_jpeg_file } = exif_from_jpeg_buffer("wombat")
@@ -11,6 +47,20 @@ defmodule ExexifTest do
   test "correctly reports no exif" do
     no_exif = "test/images/pp_editors_no_exif.jpg"
     assert {:error, :no_exif_data_in_jpeg} = exif_from_jpeg_file(no_exif)
+  end
+
+  test "correctly reports no exif (banged version)" do
+    no_exif = "test/images/pp_editors_no_exif.jpg"
+    assert_raise Exexif.ReadError, ~r/Error reading EXIF data from file/, fn ->
+      exif_from_jpeg_file!(no_exif)
+    end
+  end
+
+  test "correctly reports no exif for (banged version, buffer)" do
+    no_exif = File.read! "test/images/pp_editors_no_exif.jpg"
+    assert_raise Exexif.ReadError, ~r/Error reading EXIF data from buffer/, fn ->
+      exif_from_jpeg_buffer!(no_exif)
+    end
   end
 
   test "handles exif" do
@@ -22,58 +72,25 @@ defmodule ExexifTest do
 
     assert %{
       :image_description => "                               ",
-      :make              => "SONY", 
+      :make              => "SONY",
       :model             => "DSC-RX100M2",
       :modify_date       => "\"2014:05:14 11:57:07\"",
       :orientation       => "Horizontal (normal)",
-      :resolution_units  => "Pixels/in", 
+      :resolution_units  => "Pixels/in",
       :software          => "DSC-RX100M2 v1.00",
-      :x_resolution      => 72, 
+      :x_resolution      => 72,
       :y_resolution      => 72,
     } = metadata
   end
 
   test "exif fields are reasonable" do
-    {:ok, metadata} = exif_from_jpeg_buffer(@data)
+    with {:ok, metadata} <- exif_from_jpeg_buffer(@data) do
+      assert @test_exif = metadata.exif
+    end
+  end
 
-    exif = metadata.exif
-
-    assert %{
-      :brightness_value          => 7.084, 
-      :color_space               => "sRGB",
-      :component_configuration   => "Y,Cb,Cr,-", 
-      :compressed_bits_per_pixel => 2,
-      :contrast                  => "Normal", 
-      :custom_rendered           => "Normal",
-      :datetime_digitized        => "2014:05:14 11:57:07",
-      :datetime_original         => "2014:05:14 11:57:07", 
-      :digital_zoom_ratio        => 1,
-      :exif_image_height         => 335, 
-      :exif_image_width          => 800,
-      :exif_version              => "2.30", 
-      :exposure_mode             => "Auto",
-      :exposure_bias_value       => 0, 
-      :exposure_program          => "Program AE",
-      :exposure_time             => "1/200", 
-      :f_number                  => 4, 
-      :file_source               => "Digital Camera",
-      :flash                     => "Off, Did not fire", 
-      :flash_pix_version         => "1.00",
-      :focal_length_in_35mm_film => 28, 
-      :focal_length              => 10.4,
-      :iso_speed_ratings         => 160, 
-      :lens_info                 => [10.4, 37.1, 1.8, 4.9],
-      :light_source              => 0, 
-      :max_aperture_value        => 1.695,
-      :metering_mode             => "Multi-segment", 
-      :recommended_exposure      => 160,
-      :saturation                => "Normal", 
-      :scene_capture_type        => "Standard",
-      :scene_type                => "Directly photographed",
-      :sensitivity_type          => "Recommended Exposure Index",
-      :sharpness                 => "Normal", 
-      :white_balance             => "Auto"
-    } = exif
+  test "banged version works as expected" do
+    assert @test_exif = exif_from_jpeg_buffer!(@data).exif
   end
 
   test "malformed images" do
