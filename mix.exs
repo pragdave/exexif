@@ -3,7 +3,7 @@ defmodule Exexif.Mixfile do
 
   def project do
     [app: :exexif,
-     version: "0.0.2",
+     version: "0.0.3",
      elixir: "~> 1.1-dev",
      deps: [],
      description: description(),
