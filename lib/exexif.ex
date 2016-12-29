@@ -20,6 +20,12 @@ defmodule Exexif do
     exif_from_jpeg_buffer(buffer)
   end
 
+  def exif_from_jpeg_file!(name) when is_binary(name) do
+    case exif_from_jpeg_file(name) do
+      {:ok, result}   -> result
+      {:error, error} -> raise(Exexif.ReadError, type: error, file: name)
+    end
+  end
 
   def exif_from_jpeg_buffer(<< @image_start_marker :: 16, rest :: binary>>) do
     read_exif(rest)
@@ -27,6 +33,12 @@ defmodule Exexif do
 
   def exif_from_jpeg_buffer(_), do: {:error, :not_a_jpeg_file}
 
+  def exif_from_jpeg_buffer!(buffer) do
+    case exif_from_jpeg_buffer(buffer) do
+      {:ok, result}   -> result
+      {:error, error} -> raise Exexif.ReadError, type: error, file: nil
+    end
+  end
 
   def read_exif(<<
                   @app1_marker :: 16,
