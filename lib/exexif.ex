@@ -64,7 +64,7 @@ defmodule Exexif do
     42     = read_unsigned.(forty_two)  # sanity check
     offset = read_unsigned.(offset)
 
-    { :ok, read_ifd({exif, offset, read_unsigned}) }
+    { :ok, reshape(read_ifd({exif, offset, read_unsigned})) }
   end
 
   def read_exif(<< 0xff :: 8, _number :: 8, len :: 16, data :: binary>>) do
@@ -110,9 +110,9 @@ defmodule Exexif do
     value = Tag.value(format, component_count, value, context)
     {name, description} = Decode.tag(type, tag, value)
     kv = case name do
-      :exif -> { :exif, read_exif(value, context) }
-      :gps  -> { :gps,  read_gps(value, context) }
-      _     -> { name,  description }
+      :exif      -> { :exif, read_exif(value, context) }
+      :gps       -> { :gps,  read_gps(value, context) }
+      _          -> { name,  description }
     end
     read_tags(count-1, rest, context, type, [ kv | result ])
   end
@@ -130,5 +130,29 @@ defmodule Exexif do
   def read_gps(gps_offset, {gps, _offset, ru} = context) do
     << _ :: binary-size(gps_offset), count :: binary-size(2), tags :: binary >> = gps
     struct(Exexif.Data.Gps, read_tags(ru.(count), tags, context, :gps, []))
+  end
+
+  defp reshape(result) do
+    result
+    |> extract_thumbnail
+  end
+
+  defp extract_thumbnail(result) do
+    exif_keys = Map.keys(result.exif)
+    result =  if Enum.all?(Exexif.Data.Thumbnail.fields, fn e -> Enum.any?(exif_keys, & &1 == e) end) do
+                Map.put(
+                  result,
+                  :thumbnail,
+                  struct(
+                    Exexif.Data.Thumbnail,
+                    Exexif.Data.Thumbnail.fields
+                    |> Enum.map(fn e -> {e, result.exif[e]} end)
+                    |> Enum.into(%{})
+                  )
+                )
+              else
+                result
+              end
+    %{result | exif: Map.drop(result.exif, Exexif.Data.Thumbnail.fields)}
   end
 end
