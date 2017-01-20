@@ -1,9 +1,11 @@
 defmodule Exexif.Decode do
 
-  @module_doc """
+  @moduledoc """
     Decode tags and (in some cases) their parameters
   """
 
+  def tag(:tiff, 0x0100, value), do: { :image_width, value }
+  def tag(:tiff, 0x0101, value), do: { :image_height, value }
   def tag(:tiff, 0x010d, value), do: { :document_name, value }
   def tag(:tiff, 0x010e, value), do: { :image_description, value }
   def tag(:tiff, 0x010f, value), do: { :make, value }
@@ -14,74 +16,83 @@ defmodule Exexif.Decode do
   def tag(:tiff, 0x0128, value), do: { :resolution_units, resolution(value) }
   def tag(:tiff, 0x0131, value), do: { :software, value }
   def tag(:tiff, 0x0132, value), do: { :modify_date, inspect(value) }
-  def tag(:tiff, 0x8769, value), do: { :exif, value }
-      
 
-  def tag(:exif, 0x829a, value), do: {:exposure_time, value }
-  def tag(:exif, 0x829d, value), do: {:f_number, value }
-  def tag(:exif, 0x8822, value), do: {:exposure_program, exposure_program(value) }
-  def tag(:exif, 0x8824, value), do: {:spectral_sensitivity, value }
-  def tag(:exif, 0x8827, value), do: {:iso_speed_ratings, value }
-  def tag(:exif, 0x8828, value), do: {:oecf, value }
-  def tag(:exif, 0x8830, value), do: {:sensitivity_type, sensitivity_type(value) }
-  def tag(:exif, 0x8831, value), do: {:standard_output_sensitivity, value }
-  def tag(:exif, 0x8832, value), do: {:recommended_exposure, value }
-  def tag(:exif, 0x9000, value), do: {:exif_version, version(value) }
-  def tag(:exif, 0x9003, value), do: {:datetime_original, value }
-  def tag(:exif, 0x9004, value), do: {:datetime_digitized, value }
-  def tag(:exif, 0x9101, value), do: {:component_configuration, component_configuration(value) }
-  def tag(:exif, 0x9102, value), do: {:compressed_bits_per_pixel, value }
-  def tag(:exif, 0x9201, value), do: {:shutter_speed_value, value }
-  def tag(:exif, 0x9202, value), do: {:aperture_value, value }
-  def tag(:exif, 0x9203, value), do: {:brightness_value, value }
-  def tag(:exif, 0x9204, value), do: {:exposure_bias_value, value }
-  def tag(:exif, 0x9205, value), do: {:max_aperture_value, value }
-  def tag(:exif, 0x9206, value), do: {:subject_distance, value }
-  def tag(:exif, 0x9207, value), do: {:metering_mode, metering_mode(value) }
-  def tag(:exif, 0x9208, value), do: {:light_source, value }
-  def tag(:exif, 0x9209, value), do: {:flash, flash(value) }
-  def tag(:exif, 0x920a, value), do: {:focal_length, value }
-  def tag(:exif, 0x9214, value), do: {:subject_area, value }
-  def tag(:exif, 0x927c, value), do: {:maker_note, value }
-  def tag(:exif, 0x9286, value), do: {:user_comment, value }
-  def tag(:exif, 0x9290, value), do: {:subsec_time, value }
-  def tag(:exif, 0x9291, value), do: {:subsec_time_orginal, value }
-  def tag(:exif, 0x9292, value), do: {:subsec_time_digitized, value }
-  def tag(:exif, 0xa000, value), do: {:flash_pix_version, version(value) }
-  def tag(:exif, 0xa001, value), do: {:color_space, color_space(value) }
-  def tag(:exif, 0xa002, value), do: {:exif_image_width, value }
-  def tag(:exif, 0xa003, value), do: {:exif_image_height, value }
-  def tag(:exif, 0xa004, value), do: {:related_sound_file, value }
-  def tag(:exif, 0xa20b, value), do: {:flash_energy, value }
-  def tag(:exif, 0xa20c, value), do: {:spatial_frequency_response, value }
-  def tag(:exif, 0xa20e, value), do: {:focal_plane_x_resolution, value }	
-  def tag(:exif, 0xa20f, value), do: {:focal_plane_y_resolution, value }
-  def tag(:exif, 0xa210, value), do: {:focal_plane_resolution_unit, focal_plane_resolution_unit(value) }
-  def tag(:exif, 0xa214, value), do: {:subject_location, value }
-  def tag(:exif, 0xa215, value), do: {:exposure_index, value }
-  def tag(:exif, 0xa217, value), do: {:sensing_method, sensing_method(value) }
-  def tag(:exif, 0xa300, value), do: {:file_source, file_source(value) }
-  def tag(:exif, 0xa301, value), do: {:scene_type, scene_type(value) }
-  def tag(:exif, 0xa302, value), do: {:cfa_pattern, value }
-  def tag(:exif, 0xa401, value), do: {:custom_rendered, custom_rendered(value) }
-  def tag(:exif, 0xa402, value), do: {:exposure_mode, exposure_mode(value) }
-  def tag(:exif, 0xa403, value), do: {:white_balance, white_balance(value) }
-  def tag(:exif, 0xa404, value), do: {:digital_zoom_ratio, value }
-  def tag(:exif, 0xa405, value), do: {:focal_length_in_35mm_film, value }
-  def tag(:exif, 0xa406, value), do: {:scene_capture_type, scene_capture_type(value) }
-  def tag(:exif, 0xa407, value), do: {:gain_control, gain_control(value) }
-  def tag(:exif, 0xa408, value), do: {:contrast, contrast(value) }
-  def tag(:exif, 0xa409, value), do: {:saturation, saturation(value) }
-  def tag(:exif, 0xa40a, value), do: {:sharpness, sharpness(value) }
-  def tag(:exif, 0xa40b, value), do: {:device_setting_description, value }
-  def tag(:exif, 0xa40c, value), do: {:subject_distance_range, subject_distance_range(value) }
-  def tag(:exif, 0xa420, value), do: {:image_unique_id, value }
-  def tag(:exif, 0xa432, value), do: {:lens_info, value }
-  def tag(:exif, 0xa433, value), do: {:lens_make, value }
-  def tag(:exif, 0xa434, value), do: {:lens_model, value }
-  def tag(:exif, 0xa435, value), do: {:lens_serial_number, value }
+  def tag(:tiff, 0x8769, value), do: {:exif, value }
+  def tag(:tiff, 0x8825, value), do: {:gps, value }
 
+  def tag(:exif, 0x0201, value), do: {:thumbnail_offset, value }
+  def tag(:exif, 0x0202, value), do: {:thumbnail_size, value }
 
+  def tag(_, 0x829a, value), do: {:exposure_time, value }
+  def tag(_, 0x829d, value), do: {:f_number, value }
+  def tag(_, 0x8822, value), do: {:exposure_program, exposure_program(value) }
+  def tag(_, 0x8824, value), do: {:spectral_sensitivity, value }
+  def tag(_, 0x8827, value), do: {:iso_speed_ratings, value }
+  def tag(_, 0x8828, value), do: {:oecf, value }
+  def tag(_, 0x8830, value), do: {:sensitivity_type, sensitivity_type(value) }
+  def tag(_, 0x8831, value), do: {:standard_output_sensitivity, value }
+  def tag(_, 0x8832, value), do: {:recommended_exposure, value }
+  def tag(_, 0x9000, value), do: {:exif_version, version(value) }
+  def tag(_, 0x9003, value), do: {:datetime_original, value }
+  def tag(_, 0x9004, value), do: {:datetime_digitized, value }
+  def tag(_, 0x9101, value), do: {:component_configuration, component_configuration(value) }
+  def tag(_, 0x9102, value), do: {:compressed_bits_per_pixel, value }
+  def tag(_, 0x9201, value), do: {:shutter_speed_value, value }
+  def tag(_, 0x9202, value), do: {:aperture_value, value }
+  def tag(_, 0x9203, value), do: {:brightness_value, value }
+  def tag(_, 0x9204, value), do: {:exposure_bias_value, value }
+  def tag(_, 0x9205, value), do: {:max_aperture_value, value }
+  def tag(_, 0x9206, value), do: {:subject_distance, value }
+  def tag(_, 0x9207, value), do: {:metering_mode, metering_mode(value) }
+  def tag(_, 0x9208, value), do: {:light_source, value }
+  def tag(_, 0x9209, value), do: {:flash, flash(value) }
+  def tag(_, 0x920a, value), do: {:focal_length, value }
+  def tag(_, 0x9214, value), do: {:subject_area, value }
+  def tag(_, 0x927c, value), do: {:maker_note, value }
+  def tag(_, 0x9286, value), do: {:user_comment, value }
+  def tag(_, 0x9290, value), do: {:subsec_time, value }
+  def tag(_, 0x9291, value), do: {:subsec_time_orginal, value }
+  def tag(_, 0x9292, value), do: {:subsec_time_digitized, value }
+  def tag(_, 0xa000, value), do: {:flash_pix_version, version(value) }
+  def tag(_, 0xa001, value), do: {:color_space, color_space(value) }
+  def tag(_, 0xa002, value), do: {:exif_image_width, value }
+  def tag(_, 0xa003, value), do: {:exif_image_height, value }
+  def tag(_, 0xa004, value), do: {:related_sound_file, value }
+  def tag(_, 0xa20b, value), do: {:flash_energy, value }
+  def tag(_, 0xa20c, value), do: {:spatial_frequency_response, value }
+  def tag(_, 0xa20e, value), do: {:focal_plane_x_resolution, value }
+  def tag(_, 0xa20f, value), do: {:focal_plane_y_resolution, value }
+  def tag(_, 0xa210, value), do: {:focal_plane_resolution_unit, focal_plane_resolution_unit(value) }
+  def tag(_, 0xa214, value), do: {:subject_location, value }
+  def tag(_, 0xa215, value), do: {:exposure_index, value }
+  def tag(_, 0xa217, value), do: {:sensing_method, sensing_method(value) }
+  def tag(_, 0xa300, value), do: {:file_source, file_source(value) }
+  def tag(_, 0xa301, value), do: {:scene_type, scene_type(value) }
+  def tag(_, 0xa302, value), do: {:cfa_pattern, value }
+  def tag(_, 0xa401, value), do: {:custom_rendered, custom_rendered(value) }
+  def tag(_, 0xa402, value), do: {:exposure_mode, exposure_mode(value) }
+  def tag(_, 0xa403, value), do: {:white_balance, white_balance(value) }
+  def tag(_, 0xa404, value), do: {:digital_zoom_ratio, value }
+  def tag(_, 0xa405, value), do: {:focal_length_in_35mm_film, value }
+  def tag(_, 0xa406, value), do: {:scene_capture_type, scene_capture_type(value) }
+  def tag(_, 0xa407, value), do: {:gain_control, gain_control(value) }
+  def tag(_, 0xa408, value), do: {:contrast, contrast(value) }
+  def tag(_, 0xa409, value), do: {:saturation, saturation(value) }
+  def tag(_, 0xa40a, value), do: {:sharpness, sharpness(value) }
+  def tag(_, 0xa40b, value), do: {:device_setting_description, value }
+  def tag(_, 0xa40c, value), do: {:subject_distance_range, subject_distance_range(value) }
+  def tag(_, 0xa420, value), do: {:image_unique_id, value }
+  def tag(_, 0xa432, value), do: {:lens_info, value }
+  def tag(_, 0xa433, value), do: {:lens_make, value }
+  def tag(_, 0xa434, value), do: {:lens_model, value }
+  def tag(_, 0xa435, value), do: {:lens_serial_number, value }
+
+  # http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/GPS.html
+  Exexif.Data.Gps.fields
+  |> Enum.with_index
+  |> Enum.each(fn {e, i} ->
+    def tag(:gps, unquote(i), value), do: {unquote(e), value}
+  end)
 
   def tag(type, tag, value) do
     {~s[#{type} tag(0x#{:io_lib.format("~.16B", [tag])})], inspect value }
@@ -116,7 +127,7 @@ defmodule Exexif.Decode do
   defp sensitivity_type(1), do: "Standard Output Sensitivity"
   defp sensitivity_type(2), do: "Recommended Exposure Index"
   defp sensitivity_type(3), do: "ISO Speed"
-  defp sensitivity_type(4), do: " Standard Output Sensitivity and Recommended Exposure Index" 
+  defp sensitivity_type(4), do: " Standard Output Sensitivity and Recommended Exposure Index"
   defp sensitivity_type(5), do: "Standard Output Sensitivity and ISO Speed"
   defp sensitivity_type(6), do: "Recommended Exposure Index and ISO Speed"
   defp sensitivity_type(7), do: "Standard Output Sensitivity, Recommended Exposure Index and ISO Speed"
@@ -137,7 +148,7 @@ defmodule Exexif.Decode do
   defp metering_mode(4),   do: "Multi-spot"
   defp metering_mode(5),   do: "Multi-segment"
   defp metering_mode(6),   do: "Partial"
-  defp metering_mode(255), do: "Other"
+  defp metering_mode(_), do: "Other"
 
 
   defp color_space(0x1),    do: "sRGB"
