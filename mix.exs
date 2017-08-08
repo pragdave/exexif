@@ -2,17 +2,20 @@ defmodule Exexif.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :exexif,
-     version: "0.0.3",
-     elixir: "~> 1.1-dev",
-     deps: [],
-     description: description(),
-     package:     package(),
+    [
+      app:         :exexif,
+      version:     "0.0.3",
+      elixir:      ">= 1.1.0",
+      deps:        [],
+      description: description(),
+      package:     package(),
     ]
   end
 
   def application do
-    [applications: []]
+    [
+      applications: []
+    ]
   end
 
   defp description do
