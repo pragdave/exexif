@@ -115,6 +115,11 @@ defmodule ExexifTest do
     assert %{exif: %{exposure_bias_value: -0.333}} = data
   end
 
+  test "handles non-standard CustomRendered tag" do
+    assert {:ok, data} = exif_from_jpeg_file("test/images/non_standard_custom_rendered.jpg")
+    assert %{exif: %{custom_rendered: "Unknown (4)"}} = data
+  end
+
   defp exif_from_app1_file(path) do
     read_exif(File.read!(path))
   end
