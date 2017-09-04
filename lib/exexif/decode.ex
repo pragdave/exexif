@@ -180,6 +180,7 @@ defmodule Exexif.Decode do
 
   defp custom_rendered(0), do: "Normal"
   defp custom_rendered(1), do: "Custom"
+  defp custom_rendered(v) when is_number(v), do: "Unknown (#{v})"
 
   defp scene_type(1), do: "Directly photographed"
 
