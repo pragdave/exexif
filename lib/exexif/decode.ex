@@ -113,6 +113,7 @@ defmodule Exexif.Decode do
   defp resolution(2), do: "Pixels/in"
   defp resolution(3), do: "Pixels/cm"
 
+  defp exposure_program(0), do: "Unknown"
   defp exposure_program(1), do: "Manual"
   defp exposure_program(2), do: "Program AE"
   defp exposure_program(3), do: "Aperture-priority AE"
