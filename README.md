@@ -1,4 +1,4 @@
-#Exexif
+# Exexif
 
 _Read TIFF and EXIF information from a JPEG-format image._
 
