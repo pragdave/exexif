@@ -137,8 +137,8 @@ defmodule Exexif do
     |> extract_thumbnail
   end
 
-  defp extract_thumbnail(result) do
-    exif_keys = Map.keys(result.exif)
+  defp extract_thumbnail(%{exif: exif} = result) do 
+    exif_keys = Map.keys(exif)
     result =  if Enum.all?(Exexif.Data.Thumbnail.fields, fn e -> Enum.any?(exif_keys, & &1 == e) end) do
                 Map.put(
                   result,
