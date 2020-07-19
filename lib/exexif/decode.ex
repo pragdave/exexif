@@ -1,8 +1,13 @@
 defmodule Exexif.Decode do
   @moduledoc """
-    Decode tags and (in some cases) their parameters
+    Decode tags and (in some cases) their parameters.
   """
 
+  alias Exexif.Data.Gps
+
+  @spec tag(atom(), non_neg_integer(), value) :: {atom | <<_::64, _::_*8>>, value}
+        when value: binary() | float() | non_neg_integer()
+  @doc "Returns the decoded and humanized tag out of raw exif representation."
   def tag(:tiff, 0x0100, value), do: {:image_width, value}
   def tag(:tiff, 0x0101, value), do: {:image_height, value}
   def tag(:tiff, 0x010D, value), do: {:document_name, value}
@@ -90,7 +95,7 @@ defmodule Exexif.Decode do
   def tag(_, 0xA435, value), do: {:lens_serial_number, value}
 
   # http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/GPS.html
-  Exexif.Data.Gps.fields()
+  Gps.fields()
   |> Enum.with_index()
   |> Enum.each(fn {e, i} ->
     def tag(:gps, unquote(i), value), do: {unquote(e), value}
@@ -102,6 +107,7 @@ defmodule Exexif.Decode do
 
   # Value decodes
 
+  @spec orientation(non_neg_integer()) :: binary()
   defp orientation(1), do: "Horizontal (normal)"
   defp orientation(2), do: "Mirror horizontal"
   defp orientation(3), do: "Rotate 180"
@@ -112,11 +118,13 @@ defmodule Exexif.Decode do
   defp orientation(8), do: "Rotate 270 CW"
   defp orientation(other), do: "Unknown (#{other})"
 
+  @spec resolution(non_neg_integer()) :: binary()
   defp resolution(1), do: "None"
   defp resolution(2), do: "Pixels/in"
   defp resolution(3), do: "Pixels/cm"
   defp resolution(other), do: "Unknown (#{other})"
 
+  @spec exposure_program(non_neg_integer()) :: binary()
   defp exposure_program(1), do: "Manual"
   defp exposure_program(2), do: "Program AE"
   defp exposure_program(3), do: "Aperture-priority AE"
@@ -128,24 +136,29 @@ defmodule Exexif.Decode do
   defp exposure_program(9), do: "Bulb"
   defp exposure_program(other), do: "Unknown (#{other})"
 
+  @spec sensitivity_type(non_neg_integer()) :: binary()
   defp sensitivity_type(1), do: "Standard Output Sensitivity"
   defp sensitivity_type(2), do: "Recommended Exposure Index"
   defp sensitivity_type(3), do: "ISO Speed"
   defp sensitivity_type(4), do: " Standard Output Sensitivity and Recommended Exposure Index"
   defp sensitivity_type(5), do: "Standard Output Sensitivity and ISO Speed"
   defp sensitivity_type(6), do: "Recommended Exposure Index and ISO Speed"
-  defp sensitivity_type(7), do: "Standard Output Sensitivity, Recommended Exposure Index and ISO Speed"
+
+  defp sensitivity_type(7),
+    do: "Standard Output Sensitivity, Recommended Exposure Index and ISO Speed"
+
   defp sensitivity_type(other), do: "Unknown (#{other})"
 
   @comp_conf {"-", "Y", "Cb", "Cr", "R", "G", "B"}
 
+  @spec component_configuration([non_neg_integer()]) :: binary()
   defp component_configuration(list) do
-    for cc <- list do
-      elem(@comp_conf, cc)
-    end
+    list
+    |> Enum.map(&elem(@comp_conf, &1))
     |> Enum.join(",")
   end
 
+  @spec metering_mode(non_neg_integer()) :: binary()
   defp metering_mode(1), do: "Average"
   defp metering_mode(2), do: "Center-weighted average"
   defp metering_mode(3), do: "Spot"
@@ -154,6 +167,7 @@ defmodule Exexif.Decode do
   defp metering_mode(6), do: "Partial"
   defp metering_mode(other), do: "Unknown (#{other})"
 
+  @spec color_space(non_neg_integer()) :: binary()
   defp color_space(0x1), do: "sRGB"
   defp color_space(0x2), do: "Adobe RGB"
   defp color_space(0xFFFD), do: "Wide Gamut RGB"
@@ -161,6 +175,7 @@ defmodule Exexif.Decode do
   defp color_space(0xFFFF), do: "Uncalibrated"
   defp color_space(other), do: "Unknown (#{other})"
 
+  @spec focal_plane_resolution_unit(non_neg_integer()) :: binary()
   defp focal_plane_resolution_unit(1), do: "None"
   defp focal_plane_resolution_unit(2), do: "inches"
   defp focal_plane_resolution_unit(3), do: "cm"
@@ -168,6 +183,7 @@ defmodule Exexif.Decode do
   defp focal_plane_resolution_unit(5), do: "um"
   defp focal_plane_resolution_unit(other), do: "Unknown (#{other})"
 
+  @spec sensing_method(non_neg_integer()) :: binary()
   defp sensing_method(1), do: "Not defined"
   defp sensing_method(2), do: "One-chip color area"
   defp sensing_method(3), do: "Two-chip color area"
@@ -177,34 +193,41 @@ defmodule Exexif.Decode do
   defp sensing_method(8), do: "Color sequential linear"
   defp sensing_method(other), do: "Unknown (#{other})"
 
+  @spec file_source(non_neg_integer()) :: binary()
   defp file_source(1), do: "Film Scanner"
   defp file_source(2), do: "Reflection Print Scanner"
   defp file_source(3), do: "Digital Camera"
   defp file_source(0x03000000), do: "Sigma Digital Camera"
   defp file_source(other), do: "Unknown (#{other})"
 
+  @spec custom_rendered(non_neg_integer()) :: binary()
   defp custom_rendered(0), do: "Normal"
   defp custom_rendered(1), do: "Custom"
   defp custom_rendered(other), do: "Unknown (#{other})"
 
+  @spec scene_type(non_neg_integer()) :: binary()
   defp scene_type(1), do: "Directly photographed"
   defp scene_type(other), do: "Unknown (#{other})"
 
+  @spec exposure_mode(non_neg_integer()) :: binary()
   defp exposure_mode(0), do: "Auto"
   defp exposure_mode(1), do: "Manual"
   defp exposure_mode(2), do: "Auto bracket"
   defp exposure_mode(other), do: "Unknown (#{other})"
 
+  @spec white_balance(non_neg_integer()) :: binary()
   defp white_balance(0), do: "Auto"
   defp white_balance(1), do: "Manual"
   defp white_balance(other), do: "Unknown (#{other})"
 
+  @spec scene_capture_type(non_neg_integer()) :: binary()
   defp scene_capture_type(0), do: "Standard"
   defp scene_capture_type(1), do: "Landscape"
   defp scene_capture_type(2), do: "Portrait"
   defp scene_capture_type(3), do: "Night"
   defp scene_capture_type(other), do: "Unknown (#{other})"
 
+  @spec gain_control(non_neg_integer()) :: binary()
   defp gain_control(0), do: "None"
   defp gain_control(1), do: "Low gain up"
   defp gain_control(2), do: "High gain up"
@@ -212,27 +235,32 @@ defmodule Exexif.Decode do
   defp gain_control(4), do: "High gain down"
   defp gain_control(other), do: "Unknown (#{other})"
 
+  @spec contrast(non_neg_integer()) :: binary()
   defp contrast(0), do: "Normal"
   defp contrast(1), do: "Low"
   defp contrast(2), do: "High"
   defp contrast(other), do: "Unknown (#{other})"
 
+  @spec saturation(non_neg_integer()) :: binary()
   defp saturation(0), do: "Normal"
   defp saturation(1), do: "Low"
   defp saturation(2), do: "High"
   defp saturation(other), do: "Unknown (#{other})"
 
+  @spec sharpness(non_neg_integer()) :: binary()
   defp sharpness(0), do: "Normal"
   defp sharpness(1), do: "Soft"
   defp sharpness(2), do: "Hard"
   defp sharpness(other), do: "Unknown (#{other})"
 
+  @spec subject_distance_range(non_neg_integer()) :: binary()
   defp subject_distance_range(0), do: "Unknown"
   defp subject_distance_range(1), do: "Macro"
   defp subject_distance_range(2), do: "Close"
   defp subject_distance_range(3), do: "Distant"
   defp subject_distance_range(other), do: "Unknown (#{other})"
 
+  @spec flash(non_neg_integer()) :: binary()
   defp flash(0x0), do: "No Flash"
   defp flash(0x1), do: "Fired"
   defp flash(0x5), do: "Fired, Return not detected"
@@ -262,6 +290,7 @@ defmodule Exexif.Decode do
   defp flash(0x5F), do: "Auto, Fired, Red-eye reduction, Return detected"
   defp flash(other), do: "Unknown (#{other})"
 
+  @spec version(charlist()) :: binary()
   defp version([?0, major, minor1, minor2]) do
     <<major, ?., minor1, minor2>>
   end

@@ -3,12 +3,13 @@ defmodule Exexif.Mixfile do
 
   def project do
     [
-      app:         :exexif,
-      version:     "0.0.5",
-      elixir:      ">= 1.1.0",
-      deps:        [ {:ex_doc, ">= 0.0.0", only: :dev} ],
+      app: :nextexif,
+      version: "0.1.0",
+      elixir: ">= 1.6.0",
+      deps: deps(),
+      aliases: aliases(),
       description: description(),
-      package:     package(),
+      package: package()
     ]
   end
 
@@ -32,17 +33,35 @@ defmodule Exexif.Mixfile do
     """
   end
 
-  @me "Dave Thomas <dave@pragprog.org>"
+  @me "Aleksei Matiushkin <am@mudasobwa.ru>"
   defp package do
     [
-      files:        [ "lib", "mix.exs", "README.md", "LICENSE.md" ],
-      maintainers:  [ @me ],
-      contributors: [ @me, "Aleksei Matiushkin <am@mudasobwa.ru>"],
-      licenses:     [ "MIT. See LICENSE.md" ],
-      links:        %{
-                       "GitHub" => "https://github.com/pragdave/exexif",
-                    }
+      files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
+      maintainers: [@me],
+      contributors: ["Dave Thomas <dave@pragprog.org>", @me],
+      licenses: ["MIT. See LICENSE.md"],
+      links: %{
+        "GitHub" => "https://github.com/am-kantox/exexif"
+      }
     ]
   end
 
+  defp aliases do
+    [
+      quality: ["format", "credo --strict", "dialyzer"],
+      "quality.ci": [
+        "format --check-formatted",
+        "credo --strict",
+        "dialyzer"
+      ]
+    ]
+  end
+
+  defp deps do
+    [
+      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
+      {:credo, "~> 1.0", only: [:dev, :ci], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev, :test, :ci], runtime: false}
+    ]
+  end
 end
